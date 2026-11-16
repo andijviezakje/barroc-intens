@@ -111,3 +111,6 @@ De opdracht is onderdeel van praktijkopdracht E3 van de opleiding Software Devel
 Het project bevindt zich in de ontwikkelfase.
 
 Het eindresultaat is een werkend MVP dat de belangrijkste bedrijfsprocessen van Barroc Intens ondersteunt.
+
+![alt text](https://media.discordapp.net/attachments/832157642817536051/1151812716030349382/received_1283482428760067.gif?ex=6afc1f2f&is=6afacdaf&hm=96403b4630f1514dae66ebc41829abb7506b3f4a0ca3c3e1bc96200c8f183faa)
+![alt text2](https://media.discordapp.net/attachments/832157642817536051/1151812733487026206/received_4904130592950095.gif?ex=6afc1f33&is=6afacdb3&hm=41318977a23daa0343c259eb578fb5c88e987a99013ef7fe1fdb023aaedaa728)
