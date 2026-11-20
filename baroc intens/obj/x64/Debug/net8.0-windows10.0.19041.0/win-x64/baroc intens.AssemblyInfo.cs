@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("baroc intens")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+97c923af543afe71e554604265d45341373a4cf7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed3ed31b4cdb6ae5dce49821810dbeb50664c0c5")]
 [assembly: System.Reflection.AssemblyProductAttribute("baroc intens")]
 [assembly: System.Reflection.AssemblyTitleAttribute("baroc intens")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

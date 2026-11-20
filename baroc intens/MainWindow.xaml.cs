@@ -27,7 +27,7 @@ public sealed partial class MainWindow : Window
         {
             LoginMessage.Text = "Database wordt voorbereid...";
             LoginMessage.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Microsoft.UI.Colors.Gray);
+                Microsoft.UI.Colors.Black);
             await DatabaseInitializer.InitializeAsync();
             LoginMessage.Text = string.Empty;
             LoginButton.IsEnabled = true;
@@ -103,13 +103,15 @@ public sealed partial class MainWindow : Window
         {
             Text = $"Dashboard {GetRoleName(_currentUser.Role)}",
             FontSize = 30,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Microsoft.UI.ColorHelper.FromArgb(255, 23, 43, 77))
+                Microsoft.UI.Colors.Black)
         });
         ContentHost.Children.Add(new TextBlock
         {
             Text = $"Goedemorgen {_currentUser.DisplayName}, welkom bij Barroc Intens.",
-            FontSize = 16
+            FontSize = 16,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         });
 
         var actionButton = new Button
@@ -117,7 +119,14 @@ public sealed partial class MainWindow : Window
             Content = _currentUser.Role == UserRole.Sales
                 ? "Storingsaanvragen beheren"
                 : "Binnengekomen storingen bekijken",
-            HorizontalAlignment = HorizontalAlignment.Left
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 220, 230, 241)),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 184, 200, 217)),
+            BorderThickness = new Thickness(1),
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         };
         actionButton.Click += async (_, _) => await ShowIncidentRequestsAsync();
         ContentHost.Children.Add(actionButton);
@@ -145,7 +154,7 @@ public sealed partial class MainWindow : Window
                 {
                     Text = successMessage,
                     Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                        Microsoft.UI.ColorHelper.FromArgb(255, 35, 115, 77))
+                        Microsoft.UI.Colors.Black)
                 });
             }
 
@@ -167,7 +176,7 @@ public sealed partial class MainWindow : Window
                     Text = "Er zijn nog geen storingsaanvragen.",
                     FontSize = 16,
                     Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                        Microsoft.UI.Colors.Gray)
+                        Microsoft.UI.Colors.Black)
                 });
                 return;
             }
@@ -186,7 +195,7 @@ public sealed partial class MainWindow : Window
                 Text = "De storingsaanvragen konden niet worden geladen. Probeer het opnieuw.",
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                    Microsoft.UI.Colors.DarkRed)
+                    Microsoft.UI.Colors.Black)
             });
         }
     }
@@ -196,14 +205,19 @@ public sealed partial class MainWindow : Window
         var form = new Border
         {
             Padding = new Thickness(20),
-            CornerRadius = new CornerRadius(8),
-            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)
+            CornerRadius = new CornerRadius(12),
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 221, 227, 234)),
+            BorderThickness = new Thickness(1)
         };
-        var fields = new StackPanel { Spacing = 10 };
+        var fields = new StackPanel { Spacing = 12 };
         fields.Children.Add(new TextBlock
         {
             Text = existing is null ? "Nieuwe storingsaanvraag" : "Storingsaanvraag bewerken",
-            FontSize = 20
+            FontSize = 20,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         });
 
         var customerSelector = new ComboBox
@@ -212,7 +226,12 @@ public sealed partial class MainWindow : Window
             PlaceholderText = "Selecteer een klant",
             ItemsSource = customers,
             DisplayMemberPath = nameof(Customer.Name),
-            HorizontalAlignment = HorizontalAlignment.Stretch
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 248, 250, 252)),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 203, 213, 225)),
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         };
         if (existing is not null)
         {
@@ -224,7 +243,12 @@ public sealed partial class MainWindow : Window
             Header = "Titel *",
             PlaceholderText = "Korte omschrijving van de storing",
             MaxLength = 120,
-            Text = existing?.Title ?? string.Empty
+            Text = existing?.Title ?? string.Empty,
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 248, 250, 252)),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 203, 213, 225)),
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         };
         var descriptionBox = new TextBox
         {
@@ -234,23 +258,41 @@ public sealed partial class MainWindow : Window
             TextWrapping = TextWrapping.Wrap,
             MinHeight = 90,
             MaxLength = 2000,
-            Text = existing?.Description ?? string.Empty
+            Text = existing?.Description ?? string.Empty,
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 248, 250, 252)),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 203, 213, 225)),
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         };
         var locationBox = new TextBox
         {
             Header = "Locatie *",
             PlaceholderText = "Adres of locatie van de machine",
             MaxLength = 200,
-            Text = existing?.Location ?? string.Empty
+            Text = existing?.Location ?? string.Empty,
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 248, 250, 252)),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 203, 213, 225)),
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         };
-        var feedback = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var feedback = new TextBlock
+        {
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
         var saveButton = new Button
         {
             Content = existing is null ? "Aanvraag opslaan" : "Wijzigingen opslaan",
             HorizontalAlignment = HorizontalAlignment.Left,
             Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Microsoft.UI.ColorHelper.FromArgb(255, 23, 43, 77)),
-            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)
+                Microsoft.UI.ColorHelper.FromArgb(255, 220, 230, 241)),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 184, 200, 217)),
+            BorderThickness = new Thickness(1),
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         };
 
         saveButton.Click += async (_, _) =>
@@ -290,13 +332,13 @@ public sealed partial class MainWindow : Window
             {
                 feedback.Text = exception.Message;
                 feedback.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                    Microsoft.UI.Colors.DarkRed);
+                    Microsoft.UI.Colors.Black);
             }
             catch (Exception)
             {
                 feedback.Text = "Opslaan is niet gelukt. Controleer de invoer en probeer opnieuw.";
                 feedback.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                    Microsoft.UI.Colors.DarkRed);
+                    Microsoft.UI.Colors.Black);
             }
             finally
             {
@@ -319,24 +361,42 @@ public sealed partial class MainWindow : Window
         var card = new Border
         {
             Padding = new Thickness(18),
-            CornerRadius = new CornerRadius(8),
-            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)
+            CornerRadius = new CornerRadius(12),
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White),
+            BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 221, 227, 234)),
+            BorderThickness = new Thickness(1)
         };
         var details = new StackPanel { Spacing = 6 };
-        details.Children.Add(new TextBlock { Text = request.Title, FontSize = 19 });
+        details.Children.Add(new TextBlock
+        {
+            Text = request.Title,
+            FontSize = 19,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        });
         details.Children.Add(new TextBlock
         {
             Text = $"{request.Customer?.Name ?? "Onbekende klant"}  •  {GetStatusName(request.Status)}",
             Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Microsoft.UI.ColorHelper.FromArgb(255, 85, 100, 120))
+                Microsoft.UI.Colors.Black)
         });
-        details.Children.Add(new TextBlock { Text = request.Description, TextWrapping = TextWrapping.Wrap });
-        details.Children.Add(new TextBlock { Text = $"Locatie: {request.Location}" });
+        details.Children.Add(new TextBlock
+        {
+            Text = request.Description,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        });
+        details.Children.Add(new TextBlock
+        {
+            Text = $"Locatie: {request.Location}",
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        });
         details.Children.Add(new TextBlock
         {
             Text = $"Aangemeld door {request.CreatedByUser?.DisplayName ?? "onbekend"} op {request.CreatedAt:dd-MM-yyyy HH:mm}",
             FontSize = 12,
-            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray)
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
         });
 
         if (allowEdit)
@@ -344,7 +404,13 @@ public sealed partial class MainWindow : Window
             var editButton = new Button
             {
                 Content = "Bewerken",
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.ColorHelper.FromArgb(255, 220, 230, 241)),
+                BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.ColorHelper.FromArgb(255, 184, 200, 217)),
+                BorderThickness = new Thickness(1),
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
             };
             editButton.Click += (_, _) => CreateRequestForm(customers, request);
             details.Children.Add(editButton);
@@ -360,8 +426,9 @@ public sealed partial class MainWindow : Window
         {
             Text = title,
             FontSize = 28,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Microsoft.UI.ColorHelper.FromArgb(255, 23, 43, 77))
+                Microsoft.UI.Colors.Black)
         });
     }
 

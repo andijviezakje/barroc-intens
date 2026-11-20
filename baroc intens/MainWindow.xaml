@@ -9,23 +9,27 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid x:Name="RootGrid" Background="#F3F5F7" Loaded="MainWindow_Loaded">
+    <Grid x:Name="RootGrid" Background="#F2F4F7" Loaded="MainWindow_Loaded">
         <Grid x:Name="LoginView" Visibility="Visible">
-            <Border Width="440" Padding="36" CornerRadius="12" Background="White"
+            <Border Width="460" Padding="40" CornerRadius="16" Background="White"
+                    BorderBrush="#DDE3EA" BorderThickness="1"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel Spacing="16">
-                    <TextBlock Text="BARROC INTENS" FontSize="14" CharacterSpacing="180"
-                               Foreground="#A64B3C" />
-                    <TextBlock Text="Welkom terug" FontSize="30" Foreground="#172B4D" />
-                    <TextBlock Text="Log in met je account om verder te gaan." Foreground="#58677A" />
-                    <TextBox x:Name="UsernameBox" Header="Gebruikersnaam" PlaceholderText="Gebruikersnaam" />
-                    <PasswordBox x:Name="PasswordBox" Header="Wachtwoord" PlaceholderText="Wachtwoord" />
-                    <TextBlock x:Name="LoginMessage" TextWrapping="Wrap" Foreground="#A52A2A" />
+                <StackPanel Spacing="18">
+                    <TextBlock Text="BARROC INTENS" FontSize="13" FontWeight="SemiBold" CharacterSpacing="180"
+                               Foreground="Black" />
+                    <TextBlock Text="Welkom terug" FontSize="32" FontWeight="SemiBold" Foreground="Black" />
+                    <TextBlock Text="Log in met je account om verder te gaan." Foreground="Black" />
+                    <TextBox x:Name="UsernameBox" Header="Gebruikersnaam" PlaceholderText="Gebruikersnaam"
+                             Foreground="Black" Background="#F8FAFC" BorderBrush="#CBD5E1" />
+                    <PasswordBox x:Name="PasswordBox" Header="Wachtwoord" PlaceholderText="Wachtwoord"
+                                 Foreground="Black" Background="#F8FAFC" BorderBrush="#CBD5E1" />
+                    <TextBlock x:Name="LoginMessage" TextWrapping="Wrap" Foreground="Black" />
                     <Button x:Name="LoginButton" Content="Inloggen" Click="LoginButton_Click"
                             IsEnabled="False" HorizontalAlignment="Stretch"
-                            Background="#172B4D" Foreground="White" />
+                            Background="#DCE6F1" BorderBrush="#B8C8D9" BorderThickness="1"
+                            Foreground="Black" FontWeight="SemiBold" />
                     <TextBlock Text="Demo: sales / Sales123!   •   maintenance / Maintenance123!"
-                               TextWrapping="Wrap" FontSize="12" Foreground="#758195" />
+                               TextWrapping="Wrap" FontSize="12" Foreground="Black" />
                 </StackPanel>
             </Border>
         </Grid>
@@ -35,7 +39,8 @@
                 <ColumnDefinition Width="250" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Background="#172B4D" Padding="22">
+            <Border Grid.Column="0" Background="#E7ECF2" Padding="24"
+                    BorderBrush="#D5DDE6" BorderThickness="0,0,1,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -43,21 +48,26 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="BARROC INTENS" FontSize="17" CharacterSpacing="120"
-                               Foreground="White" />
-                    <StackPanel Grid.Row="1" Margin="0,28,0,20" Spacing="4">
-                        <TextBlock x:Name="UserDisplayName" Foreground="White" FontSize="16" />
-                        <TextBlock x:Name="UserRoleLabel" Foreground="#B9C5D6" FontSize="13" />
+                    <TextBlock Text="BARROC INTENS" FontSize="17" FontWeight="SemiBold" CharacterSpacing="120"
+                               Foreground="Black" />
+                    <StackPanel Grid.Row="1" Margin="0,28,0,20" Spacing="6">
+                        <TextBlock x:Name="UserDisplayName" Foreground="Black" FontSize="16" />
+                        <TextBlock x:Name="UserRoleLabel" Foreground="Black" FontSize="13" />
                     </StackPanel>
                     <StackPanel Grid.Row="2" Spacing="10">
-                        <Button Content="Dashboard" Click="DashboardButton_Click" HorizontalAlignment="Stretch" />
-                        <Button x:Name="WorkButton" Click="WorkButton_Click" HorizontalAlignment="Stretch" />
+                        <Button Content="Dashboard" Click="DashboardButton_Click" HorizontalAlignment="Stretch"
+                                Foreground="Black" Background="#F8FAFC" BorderBrush="#D5DDE6"
+                                BorderThickness="1" FontWeight="SemiBold" />
+                        <Button x:Name="WorkButton" Click="WorkButton_Click" HorizontalAlignment="Stretch"
+                                Foreground="Black" Background="#F8FAFC" BorderBrush="#D5DDE6"
+                                BorderThickness="1" FontWeight="SemiBold" />
                     </StackPanel>
                     <Button Grid.Row="3" Content="Uitloggen" Click="LogoutButton_Click"
-                            HorizontalAlignment="Stretch" />
+                            HorizontalAlignment="Stretch" Foreground="Black" Background="#F8FAFC"
+                            BorderBrush="#D5DDE6" BorderThickness="1" />
                 </Grid>
             </Border>
-            <ScrollViewer Grid.Column="1" Padding="36">
+            <ScrollViewer Grid.Column="1" Padding="40" Background="#F2F4F7">
                 <StackPanel x:Name="ContentHost" Spacing="18" />
             </ScrollViewer>
         </Grid>

@@ -286,3 +286,4 @@ C:\Users\joeyr\source\repos\baroc intens\baroc intens\bin\x64\Debug\net8.0-windo
 C:\Users\joeyr\source\repos\baroc intens\baroc intens\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\SQLitePCLRaw.core.dll
 C:\Users\joeyr\source\repos\baroc intens\baroc intens\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\SQLitePCLRaw.provider.e_sqlite3.dll
 C:\Users\joeyr\source\repos\baroc intens\baroc intens\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\e_sqlite3.dll
+C:\Users\joeyr\source\repos\baroc intens\baroc intens\obj\x64\Debug\net8.0-windows10.0.19041.0\win-x64\baroc intens.sourcelink.json

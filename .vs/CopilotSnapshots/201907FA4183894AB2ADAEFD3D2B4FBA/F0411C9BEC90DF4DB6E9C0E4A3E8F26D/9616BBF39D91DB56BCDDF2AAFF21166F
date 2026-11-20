@@ -1,0 +1,394 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using baroc_intens.Data;
+using baroc_intens.Models;
+using baroc_intens.Services;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+
+namespace baroc_intens;
+
+public sealed partial class MainWindow : Window
+{
+    private readonly AuthService _authService = new();
+    private readonly IncidentRequestService _incidentRequestService = new();
+    private AppUser? _currentUser;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            LoginMessage.Text = "Database wordt voorbereid...";
+            LoginMessage.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.Colors.Black);
+            await DatabaseInitializer.InitializeAsync();
+            LoginMessage.Text = string.Empty;
+            LoginButton.IsEnabled = true;
+        }
+        catch (Exception exception)
+        {
+            LoginMessage.Text = $"De database kon niet worden geopend: {exception.Message}";
+        }
+    }
+
+    private async void LoginButton_Click(object sender, RoutedEventArgs e)
+    {
+        LoginButton.IsEnabled = false;
+        LoginMessage.Text = string.Empty;
+        try
+        {
+            var user = await _authService.AuthenticateAsync(UsernameBox.Text, PasswordBox.Password);
+            if (user is null)
+            {
+                LoginMessage.Text = "Gebruikersnaam of wachtwoord is onjuist.";
+                return;
+            }
+
+            _currentUser = user;
+            UserDisplayName.Text = user.DisplayName;
+            UserRoleLabel.Text = GetRoleName(user.Role);
+            WorkButton.Content = user.Role == UserRole.Sales
+                ? "Storingsaanvragen beheren"
+                : "Storingsaanvragen bekijken";
+            LoginView.Visibility = Visibility.Collapsed;
+            ApplicationView.Visibility = Visibility.Visible;
+            ShowDashboard();
+        }
+        catch (Exception exception)
+        {
+            LoginMessage.Text = $"Inloggen is niet gelukt: {exception.Message}";
+        }
+        finally
+        {
+            LoginButton.IsEnabled = true;
+        }
+    }
+
+    private void DashboardButton_Click(object sender, RoutedEventArgs e)
+    {
+        ShowDashboard();
+    }
+
+    private async void WorkButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ShowIncidentRequestsAsync();
+    }
+
+    private void LogoutButton_Click(object sender, RoutedEventArgs e)
+    {
+        _currentUser = null;
+        UsernameBox.Text = string.Empty;
+        PasswordBox.Password = string.Empty;
+        ContentHost.Children.Clear();
+        ApplicationView.Visibility = Visibility.Collapsed;
+        LoginView.Visibility = Visibility.Visible;
+    }
+
+    private void ShowDashboard()
+    {
+        if (_currentUser is null)
+        {
+            return;
+        }
+
+        ContentHost.Children.Clear();
+        ContentHost.Children.Add(new TextBlock
+        {
+            Text = $"Dashboard {GetRoleName(_currentUser.Role)}",
+            FontSize = 30,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.Colors.Black)
+        });
+        ContentHost.Children.Add(new TextBlock
+        {
+            Text = $"Goedemorgen {_currentUser.DisplayName}, welkom bij Barroc Intens.",
+            FontSize = 16
+        });
+
+        var actionButton = new Button
+        {
+            Content = _currentUser.Role == UserRole.Sales
+                ? "Storingsaanvragen beheren"
+                : "Binnengekomen storingen bekijken",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
+        actionButton.Click += async (_, _) => await ShowIncidentRequestsAsync();
+        ContentHost.Children.Add(actionButton);
+    }
+
+    private async Task ShowIncidentRequestsAsync(string? successMessage = null)
+    {
+        var currentUser = _currentUser;
+        if (currentUser is null)
+        {
+            return;
+        }
+
+        ContentHost.Children.Clear();
+        var isSales = currentUser.Role == UserRole.Sales;
+        var requiredRole = isSales ? UserRole.Sales : UserRole.Maintenance;
+        RoleAuthorization.RequireRole(currentUser, requiredRole);
+
+        try
+        {
+            AddPageTitle(isSales ? "Storingsaanvragen" : "Binnengekomen storingsaanvragen");
+            if (!string.IsNullOrWhiteSpace(successMessage))
+            {
+                ContentHost.Children.Add(new TextBlock
+                {
+                    Text = successMessage,
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Black)
+                });
+            }
+
+            List<Customer> customers = [];
+            if (isSales)
+            {
+                customers = await _incidentRequestService.GetCustomersForSalesAsync(currentUser);
+                CreateRequestForm(customers);
+            }
+
+            var requests = isSales
+                ? await _incidentRequestService.GetForSalesAsync(currentUser)
+                : await _incidentRequestService.GetForMaintenanceAsync(currentUser);
+
+            if (requests.Count == 0)
+            {
+                ContentHost.Children.Add(new TextBlock
+                {
+                    Text = "Er zijn nog geen storingsaanvragen.",
+                    FontSize = 16,
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Black)
+                });
+                return;
+            }
+
+            foreach (var request in requests)
+            {
+                AddIncidentCard(request, isSales, customers);
+            }
+        }
+        catch (Exception)
+        {
+            ContentHost.Children.Clear();
+            AddPageTitle("Storingsaanvragen");
+            ContentHost.Children.Add(new TextBlock
+            {
+                Text = "De storingsaanvragen konden niet worden geladen. Probeer het opnieuw.",
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Black)
+            });
+        }
+    }
+
+    private void CreateRequestForm(List<Customer> customers, IncidentRequest? existing = null)
+    {
+        var form = new Border
+        {
+            Padding = new Thickness(20),
+            CornerRadius = new CornerRadius(8),
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)
+        };
+        var fields = new StackPanel { Spacing = 10 };
+        fields.Children.Add(new TextBlock
+        {
+            Text = existing is null ? "Nieuwe storingsaanvraag" : "Storingsaanvraag bewerken",
+            FontSize = 20
+        });
+
+        var customerSelector = new ComboBox
+        {
+            Header = "Klant *",
+            PlaceholderText = "Selecteer een klant",
+            ItemsSource = customers,
+            DisplayMemberPath = nameof(Customer.Name),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
+        if (existing is not null)
+        {
+            customerSelector.SelectedItem = customers.FirstOrDefault(customer => customer.Id == existing.CustomerId);
+        }
+
+        var titleBox = new TextBox
+        {
+            Header = "Titel *",
+            PlaceholderText = "Korte omschrijving van de storing",
+            MaxLength = 120,
+            Text = existing?.Title ?? string.Empty,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
+        var descriptionBox = new TextBox
+        {
+            Header = "Omschrijving *",
+            PlaceholderText = "Beschrijf de storing",
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 90,
+            MaxLength = 2000,
+            Text = existing?.Description ?? string.Empty,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
+        var locationBox = new TextBox
+        {
+            Header = "Locatie *",
+            PlaceholderText = "Adres of locatie van de machine",
+            MaxLength = 200,
+            Text = existing?.Location ?? string.Empty,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
+        var feedback = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var saveButton = new Button
+        {
+            Content = existing is null ? "Aanvraag opslaan" : "Wijzigingen opslaan",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 23, 43, 77)),
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        };
+
+        saveButton.Click += async (_, _) =>
+        {
+            var user = _currentUser;
+            if (user is null)
+            {
+                return;
+            }
+
+            saveButton.IsEnabled = false;
+            feedback.Text = string.Empty;
+            try
+            {
+                if (customerSelector.SelectedItem is not Customer selectedCustomer)
+                {
+                    feedback.Text = "Selecteer een klant.";
+                    return;
+                }
+
+                if (existing is null)
+                {
+                    await _incidentRequestService.CreateAsync(
+                        user, selectedCustomer.Id, titleBox.Text, descriptionBox.Text, locationBox.Text);
+                }
+                else
+                {
+                    await _incidentRequestService.UpdateAsync(
+                        user, existing.Id, selectedCustomer.Id, titleBox.Text, descriptionBox.Text, locationBox.Text);
+                }
+
+                await ShowIncidentRequestsAsync(existing is null
+                    ? "De storingsaanvraag is succesvol aangemaakt."
+                    : "De storingsaanvraag is succesvol aangepast.");
+            }
+            catch (ArgumentException exception)
+            {
+                feedback.Text = exception.Message;
+                feedback.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Black);
+            }
+            catch (Exception)
+            {
+                feedback.Text = "Opslaan is niet gelukt. Controleer de invoer en probeer opnieuw.";
+                feedback.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Black);
+            }
+            finally
+            {
+                saveButton.IsEnabled = true;
+            }
+        };
+
+        fields.Children.Add(customerSelector);
+        fields.Children.Add(titleBox);
+        fields.Children.Add(descriptionBox);
+        fields.Children.Add(locationBox);
+        fields.Children.Add(feedback);
+        fields.Children.Add(saveButton);
+        form.Child = fields;
+        ContentHost.Children.Add(form);
+    }
+
+    private void AddIncidentCard(IncidentRequest request, bool allowEdit, List<Customer> customers)
+    {
+        var card = new Border
+        {
+            Padding = new Thickness(18),
+            CornerRadius = new CornerRadius(8),
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)
+        };
+        var details = new StackPanel { Spacing = 6 };
+        details.Children.Add(new TextBlock { Text = request.Title, FontSize = 19 });
+        details.Children.Add(new TextBlock
+        {
+            Text = $"{request.Customer?.Name ?? "Onbekende klant"}  •  {GetStatusName(request.Status)}",
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.Colors.Black)
+        });
+        details.Children.Add(new TextBlock { Text = request.Description, TextWrapping = TextWrapping.Wrap });
+        details.Children.Add(new TextBlock { Text = $"Locatie: {request.Location}" });
+        details.Children.Add(new TextBlock
+        {
+            Text = $"Aangemeld door {request.CreatedByUser?.DisplayName ?? "onbekend"} op {request.CreatedAt:dd-MM-yyyy HH:mm}",
+            FontSize = 12,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+        });
+
+        if (allowEdit)
+        {
+            var editButton = new Button
+            {
+                Content = "Bewerken",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black)
+            };
+            editButton.Click += (_, _) => CreateRequestForm(customers, request);
+            details.Children.Add(editButton);
+        }
+
+        card.Child = details;
+        ContentHost.Children.Add(card);
+    }
+
+    private void AddPageTitle(string title)
+    {
+        ContentHost.Children.Add(new TextBlock
+        {
+            Text = title,
+            FontSize = 28,
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.ColorHelper.FromArgb(255, 23, 43, 77))
+        });
+    }
+
+    private static string GetStatusName(IncidentStatus status)
+    {
+        return status switch
+        {
+            IncidentStatus.Open => "Nieuw",
+            IncidentStatus.InProgress => "In behandeling",
+            IncidentStatus.Closed => "Afgerond",
+            _ => "Onbekend"
+        };
+    }
+
+    private static string GetRoleName(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Sales => "Sales",
+            UserRole.Maintenance => "Maintenance",
+            _ => "Onbekende rol"
+        };
+    }
+}
